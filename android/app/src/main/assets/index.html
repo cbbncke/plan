@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>目标倒计时</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg1:#1a1a2e;--bg2:#16213e;--card-bg:rgba(30,30,46,0.85);--card-bd:rgba(255,255,255,0.1);--t1:#fff;--t2:rgba(255,255,255,0.7);--t3:rgba(255,255,255,0.5);--acc:#00d4aa;--dng:#ff6b6b;--tb-bg:rgba(26,26,46,0.95);--modal-bg:#1e1e2e;--inp-bg:rgba(255,255,255,0.1);--inp-bd:rgba(255,255,255,0.2);--ov-bg:rgba(0,0,0,0.6);--shd:0 8px 32px rgba(0,0,0,0.3)}
+[data-theme="light"]{--bg1:#e8f5e9;--bg2:#c8e6c9;--card-bg:rgba(255,255,255,0.9);--card-bd:rgba(0,0,0,0.08);--t1:#1a1a2e;--t2:rgba(26,26,46,0.7);--t3:rgba(26,26,46,0.5);--acc:#2e7d32;--dng:#c62828;--tb-bg:rgba(232,245,233,0.95);--modal-bg:#fff;--inp-bg:rgba(0,0,0,0.05);--inp-bd:rgba(0,0,0,0.15);--ov-bg:rgba(0,0,0,0.4);--shd:0 8px 32px rgba(0,0,0,0.1)}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg1);color:var(--t1);overflow-x:hidden}
+body{background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg1) 100%);background-attachment:fixed}
+[data-theme="light"] body{background:linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 30%,#a5d6a7 60%,#81c784 100%);background-attachment:fixed}
+.toolbar{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 12px;background:var(--tb-bg);backdrop-filter:blur(20px);z-index:100;border-bottom:1px solid var(--card-bd)}
+.toolbar-btn{width:40px;height:40px;border:none;background:transparent;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.toolbar-btn:hover{background:var(--inp-bg)}
+.toolbar-title{flex:1;text-align:center;font-size:18px;font-weight:600}
+.toolbar-right{display:flex;gap:4px}
+.card-list{padding:72px 16px 24px;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 80px)}
+.card{background:var(--card-bg);backdrop-filter:blur(20px);border-radius:16px;padding:20px;border:1px solid var(--card-bd);box-shadow:var(--shd);cursor:pointer;transition:transform 0.2s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-2px)}
+.card:active{transform:scale(0.98)}
+.card.expired{opacity:0.6}
+.card.expired::after{content:'已到期';position:absolute;top:12px;right:12px;background:var(--dng);color:#fff;padding:4px 10px;border-radius:12px;font-size:12px}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.card-title{font-size:18px;font-weight:600;color:var(--t1);flex:1;margin-right:8px}
+.card-emoji{font-size:24px}
+.card-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--t2);font-size:13px}
+.card-note{flex:1;margin-right:12px}
+.card-progress{white-space:nowrap}
+.card-countdown{display:flex;justify-content:space-between;align-items:center}
+.countdown-main{display:flex;align-items:baseline;gap:4px}
+.countdown-label{font-size:14px;color:var(--t2)}
+.countdown-number{font-size:36px;font-weight:700;color:var(--acc);line-height:1}
+.countdown-unit{font-size:14px;color:var(--t2);margin-left:2px}
+.card-target-date{font-size:13px;color:var(--t3)}
+.card-sort{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;opacity:0;transition:opacity 0.2s}
+.card:hover .card-sort{opacity:1}
+.sort-btn{width:28px;height:28px;border:none;background:rgba(0,0,0,0.15);color:rgba(26,26,46,0.7);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.sort-btn:hover{background:var(--acc);color:#fff}
+.sort-btn:disabled{opacity:0.3}
+.card-dark{background:linear-gradient(135deg,rgba(30,30,46,0.95),rgba(20,20,30,0.95));color:#fff}
+.card-dark .card-title,.card-dark .card-note,.card-dark .card-progress,.card-dark .card-label,.card-dark .card-target-date,.card-dark .countdown-label,.card-dark .countdown-unit{color:rgba(255,255,255,0.85)}
+.card-dark .countdown-number{color:#00d4aa}
+.card-green{background:linear-gradient(135deg,rgba(46,125,50,0.85),rgba(56,142,60,0.85));color:#fff}
+.card-green .card-title,.card-green .card-note,.card-green .card-progress,.card-green .card-label,.card-green .card-target-date,.card-green .countdown-label,.card-green .countdown-unit{color:rgba(255,255,255,0.85)}
+.card-green .countdown-number{color:#00d4aa}
+.card-blue{background:linear-gradient(135deg,rgba(144,202,249,0.85),rgba(187,222,251,0.85));color:#1a1a2e}
+.card-blue .card-title,.card-blue .card-note,.card-blue .card-progress,.card-blue .card-target-date{color:rgba(26,26,46,0.8)}
+.card-blue .countdown-number{color:#1565c0}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center}
+.empty-icon{font-size:64px;margin-bottom:16px}
+.empty-text{font-size:20px;font-weight:600;color:var(--t1);margin-bottom:8px}
+.empty-sub{font-size:14px;color:var(--t3);margin-bottom:24px}
+.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.btn-primary:hover{opacity:0.9}
+.btn-secondary{background:var(--inp-bg);color:var(--t1);border:1px solid var(--inp-bd);padding:12px 24px;border-radius:12px;font-size:16px;cursor:pointer}
+.btn-danger{background:transparent;color:var(--dng);border:1px solid var(--dng);padding:12px 24px;border-radius:12px;font-size:16px;cursor:pointer;width:100%;margin-top:12px}
+.modal-overlay,.theme-overlay,.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--ov-bg);display:flex;align-items:center;justify-content:center;z-index:200;padding:24px}
+.modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0}
+.modal-title{font-size:20px;font-weight:600;color:var(--t1)}
+.modal-close{width:32px;height:32px;border:none;background:var(--inp-bg);color:var(--t2);border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--dng);color:#fff}
+.modal-form{padding:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:14px;font-weight:500;color:var(--t2);margin-bottom:6px}
+.form-group input{width:100%;padding:12px 16px;background:var(--inp-bg);border:1px solid var(--inp-bd);border-radius:10px;font-size:16px;color:var(--t1);outline:none}
+.form-group input:focus{border-color:var(--acc)}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.7)}
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
+.form-actions{display:flex;gap:12px;margin-top:20px}
+.form-actions .btn-primary,.form-actions .btn-secondary{flex:1}
+.theme-panel{background:var(--modal-bg);border-radius:20px;width:100%;max-width:320px;padding:20px}
+.theme-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.theme-title{font-size:20px;font-weight:600;color:var(--t1)}
+.theme-options{display:flex;gap:16px}
+.theme-option{flex:1;background:transparent;border:2px solid var(--inp-bd);border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
+.theme-option.active{border-color:var(--acc)}
+.theme-preview{width:100%;height:60px;border-radius:8px}
+.theme-dark-p{background:linear-gradient(135deg,#1a1a2e,#16213e)}
+.theme-light-p{background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
+.theme-name{font-size:14px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
+.confirm-box{background:var(--modal-bg);border-radius:20px;padding:24px;width:100%;max-width:300px;text-align:center}
+.confirm-text{font-size:18px;font-weight:600;color:var(--t1);margin-bottom:8px}
+.confirm-sub{font-size:14px;color:var(--t3);margin-bottom:20px}
+.confirm-actions{display:flex;gap:12px}
+.confirm-actions .btn-secondary,.confirm-actions .btn-danger{flex:1;margin-top:0}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeIn 0.3s ease-out}
+@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+.modal,.theme-panel,.confirm-box{animation:slideUp 0.3s ease-out}
+</style>
+</head>
+<body>
+<header class="toolbar"><button class="toolbar-btn" id="btn-back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h1 class="toolbar-title">目标倒计时</h1><div class="toolbar-right"><button class="toolbar-btn" id="btn-add"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button><button class="toolbar-btn" id="btn-theme"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></button></div></header><main class="card-list" id="card-list"></main><div class="empty-state" id="empty-state" style="display:none"><div class="empty-icon">🎯</div><p class="empty-text">还没有目标</p><p class="empty-sub">点击右上角 + 添加你的第一个目标</p><button class="btn-primary" id="btn-empty-add">去添加</button></div><div class="modal-overlay" id="modal-overlay" style="display:none"><div class="modal"><div class="modal-header"><h2 class="modal-title" id="modal-title">添加目标</h2><button class="modal-close" id="modal-close">&times;</button></div><form class="modal-form" id="modal-form"><input type="hidden" id="form-id"><div class="form-group"><label>标题 *</label><input type="text" id="form-title" required></div><div class="form-group"><label>备注</label><input type="text" id="form-note"></div><div class="form-group"><label>Emoji</label><input type="text" id="form-emoji" maxlength="2"></div><div class="form-group"><label>开始日期</label><input type="date" id="form-start-date" required></div><div class="form-group"><label>目标日期 *</label><input type="date" id="form-target-date" required></div><div class="form-actions"><button type="button" class="btn-secondary" id="form-cancel">取消</button><button type="submit" class="btn-primary">保存</button></div><button type="button" class="btn-danger" id="form-delete" style="display:none">删除此目标</button></form></div></div><div class="theme-overlay" id="theme-overlay" style="display:none"><div class="theme-panel"><div class="theme-header"><h2 class="theme-title">选择主题</h2><button class="modal-close" id="theme-close">&times;</button></div><div class="theme-options"><button class="theme-option" data-theme="dark"><div class="theme-preview theme-dark-p"></div><span class="theme-name">深色</span></button><button class="theme-option" data-theme="light"><div class="theme-preview theme-light-p"></div><span class="theme-name">浅色</span></button></div></div></div><div class="confirm-overlay" id="confirm-overlay" style="display:none"><div class="confirm-box"><p class="confirm-text">确定要删除这个目标吗？</p><p class="confirm-sub">此操作不可撤销</p><div class="confirm-actions"><button class="btn-secondary" id="confirm-cancel">取消</button><button class="btn-danger" id="confirm-ok">删除</button></div></div></div>
+<script>
+const S={KEY:'ct',V:1,
+  d(){try{const r=localStorage.getItem(this.KEY);if(!r)return null;const d=JSON.parse(r);return d&&d.v===this.V?d:null}catch(e){return null}},
+  s(data){try{localStorage.setItem(this.KEY,JSON.stringify({v:this.V,t:data.t||[],th:data.th||'dark'}));return true}catch(e){return false}},
+  gt(){const d=this.d();return d?d.th:'dark'},
+  sth(th){const d=this.d()||{t:[]};d.th=th;this.s(d)},
+  gl(){const d=this.d();return d?d.t:[]},
+  sl(t){const d=this.d()||{th:'dark'};d.t=t;this.s(d)},
+  add(t){const l=this.gl();t.id=Date.now().toString(36)+Math.random().toString(36).substr(2,5);t.ct=new Date().toISOString();l.unshift(t);this.sl(l);return t},
+  upd(id,u){const l=this.gl();const i=l.findIndex(x=>x.id===id);if(i!==-1){l[i]={...l[i],...u};this.sl(l);return l[i]}return null},
+  del(id){this.sl(this.gl().filter(x=>x.id!==id))},
+  mv(id,dir){const l=this.gl();const i=l.findIndex(x=>x.id===id);if(i===-1)return false;const n=i+dir;if(n<0||n>=l.length)return false;[l[i],l[n]]=[l[n],l[i]];this.sl(l);return true},
+  ci(t){const now=new Date();now.setHours(0,0,0,0);const sd=new Date(t.sd);sd.setHours(0,0,0,0);const td=new Date(t.td);td.setHours(0,0,0,0);const total=Math.ceil((td-sd)/864e5);const passed=Math.ceil((now-sd)/864e5);const remain=Math.max(0,Math.ceil((td-now)/864e5));return{total,passed,remain,exp:remain<=0}},
+  samp(){const n=new Date().toISOString();return[
+    {id:'s1',title:'全国大学生数学竞赛',note:'拿到国赛资格',emoji:'',sd:'2026-08-28',td:'2026-11-14',cs:'dark',ct:n},
+    {id:'s2',title:'六级',note:'550',emoji:'🍳',sd:'2026-08-28',td:'2026-12-12',cs:'green',ct:n},
+    {id:'s3',title:'华五电子信息考研',note:'上岸，可以的话院',emoji:'',sd:'2025-10-14',td:'2028-06-01',cs:'blue',ct:n}
+  ]}};
+
+const A={cl:null,es:null,mo:null,mt:null,mf:null,to:null,co:null,cei:null,cdi:null,
+  init(){
+    this.cl=document.getElementById('card-list');
+    this.es=document.getElementById('empty-state');
+    this.mo=document.getElementById('modal-overlay');
+    this.mt=document.getElementById('modal-title');
+    this.mf=document.getElementById('modal-form');
+    this.to=document.getElementById('theme-overlay');
+    this.co=document.getElementById('confirm-overlay');
+    const d=S.d();
+    if(!d||!d.t||d.t.length===0)S.s({t:S.samp(),th:'dark'});
+    this.ath(S.gt());this.rc();this.be();
+  },
+  ath(th){
+    if(th==='light')document.documentElement.setAttribute('data-theme','light');
+    else document.documentElement.removeAttribute('data-theme');
+    document.querySelectorAll('.theme-option').forEach(b=>b.classList.toggle('active',b.dataset.theme===th));
+  },
+  rc(){
+    const t=S.gl();
+    if(t.length===0){this.cl.style.display='none';this.es.style.display='flex';return}
+    this.cl.style.display='flex';this.es.style.display='none';
+    this.cl.innerHTML=t.map((x,i)=>{
+      const info=S.ci(x);
+      const cc=x.cs?'card-'+x.cs:'';
+      const ec=info.exp?'expired':'';
+      const em=x.emoji?'<span class="card-emoji">'+x.emoji+'</span>':'';
+      return '<div class="card '+cc+' '+ec+'" data-id="'+x.id+'">'+
+        '<div class="card-header"><span class="card-title">'+this.esc(x.title)+'</span>'+em+'</div>'+
+        '<div class="card-info"><span class="card-note">'+this.esc(x.note||'')+'</span><span class="card-progress">已过 '+info.passed+'/'+info.total+' 天</span></div>'+
+        '<div class="card-countdown"><div class="countdown-main"><span class="countdown-label">还剩</span><span class="countdown-number">'+info.remain+'</span><span class="countdown-unit">天</span></div><span class="card-target-date">'+x.td+'</span></div>'+
+        '<div class="card-sort"><button class="sort-btn" data-a="up" data-id="'+x.id+'"'+(i===0?' disabled':'')+'↑</button><button class="sort-btn" data-a="dn" data-id="'+x.id+'"'+(i===t.length-1?' disabled':'')+'↓</button></div>'+
+        '</div>';
+    }).join('');
+  },
+  esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML},
+  be(){
+    document.getElementById('btn-add').onclick=()=>this.oam();
+    document.getElementById('btn-empty-add').onclick=()=>this.oam();
+    document.getElementById('btn-theme').onclick=()=>this.otp();
+    document.getElementById('modal-close').onclick=()=>this.cm();
+    document.getElementById('form-cancel').onclick=()=>this.cm();
+    this.mo.onclick=e=>{if(e.target===this.mo)this.cm()};
+    this.mf.onsubmit=e=>{e.preventDefault();this.sf()};
+    document.getElementById('form-delete').onclick=()=>{if(this.cei)this.ocf(this.cei)};
+    document.getElementById('theme-close').onclick=()=>this.ctp();
+    this.to.onclick=e=>{if(e.target===this.to)this.ctp()};
+    document.querySelectorAll('.theme-option').forEach(b=>{
+      b.onclick=()=>{S.sth(b.dataset.theme);this.ath(b.dataset.theme);this.ctp()};
+    });
+    document.getElementById('confirm-cancel').onclick=()=>this.ccf();
+    document.getElementById('confirm-ok').onclick=()=>this.cfd();
+    this.co.onclick=e=>{if(e.target===this.co)this.ccf()};
+    this.cl.onclick=e=>{
+      const sb=e.target.closest('.sort-btn');
+      if(sb){e.stopPropagation();S.mv(sb.dataset.id,sb.dataset.a==='up'?-1:1);this.rc();return}
+      const c=e.target.closest('.card');
+      if(c)this.oem(c.dataset.id);
+    };
+  },
+  oam(){
+    this.cei=null;this.mt.textContent='添加目标';
+    document.getElementById('form-title').value='';
+    document.getElementById('form-note').value='';
+    document.getElementById('form-emoji').value='';
+    document.getElementById('form-start-date').value=this.ts();
+    document.getElementById('form-target-date').value='';
+    document.getElementById('form-delete').style.display='none';
+    this.mo.style.display='flex';
+  },
+  oem(id){
+    const t=S.gl().find(x=>x.id===id);if(!t)return;
+    this.cei=id;this.mt.textContent='编辑目标';
+    document.getElementById('form-title').value=t.title;
+    document.getElementById('form-note').value=t.note||'';
+    document.getElementById('form-emoji').value=t.emoji||'';
+    document.getElementById('form-start-date').value=t.sd;
+    document.getElementById('form-target-date').value=t.td;
+    document.getElementById('form-delete').style.display='block';
+    this.mo.style.display='flex';
+  },
+  cm(){this.mo.style.display='none';this.cei=null},
+  sf(){
+    const title=document.getElementById('form-title').value.trim();
+    const note=document.getElementById('form-note').value.trim();
+    const emoji=document.getElementById('form-emoji').value.trim();
+    const sd=document.getElementById('form-start-date').value;
+    const td=document.getElementById('form-target-date').value;
+    if(!title||!sd||!td){alert('请填写必填项');return}
+    if(new Date(td)<=new Date(sd)){alert('目标日期必须晚于开始日期');return}
+    const cs=['dark','green','blue'];
+    const data={title,note,emoji,sd,td,cs:cs[Math.floor(Math.random()*3)]};
+    if(this.cei)S.upd(this.cei,data);else S.add(data);
+    this.cm();this.rc();
+  },
+  ts(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')},
+  otp(){this.to.style.display='flex'},
+  ctp(){this.to.style.display='none'},
+  ocf(id){this.cdi=id;this.co.style.display='flex'},
+  ccf(){this.co.style.display='none';this.cdi=null},
+  cfd(){if(this.cdi){S.del(this.cdi);this.ccf();this.cm();this.rc()}}
+};
+document.addEventListener('DOMContentLoaded',()=>A.init());
+</script>
+</body>
+</html>
