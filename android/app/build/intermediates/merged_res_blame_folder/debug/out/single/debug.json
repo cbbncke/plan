@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "com.countdown.app-merged_res-21:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.countdown.app-main-23:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\SZZY\\.gradle\\daemon\\8.14.3\\com.countdown.app-merged_res-21:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\SZZY\\.gradle\\daemon\\8.14.3\\com.countdown.app-main-23:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "com.countdown.app-merged_res-21:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.countdown.app-main-23:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.countdown.app-merged_res-21:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.countdown.app-main-23:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.countdown.app-merged_res-21:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.countdown.app-main-23:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    }
+]
