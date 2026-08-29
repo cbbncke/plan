@@ -6,93 +6,117 @@
 <title>目标倒计时</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg1:#1a1a2e;--bg2:#16213e;--card-bg:rgba(30,30,46,0.85);--card-bd:rgba(255,255,255,0.1);--t1:#fff;--t2:rgba(255,255,255,0.7);--t3:rgba(255,255,255,0.5);--acc:#00d4aa;--dng:#ff6b6b;--tb-bg:rgba(26,26,46,0.95);--modal-bg:#1e1e2e;--inp-bg:rgba(255,255,255,0.1);--inp-bd:rgba(255,255,255,0.2);--ov-bg:rgba(0,0,0,0.6);--shd:0 8px 32px rgba(0,0,0,0.3)}
-[data-theme="light"]{--bg1:#e8f5e9;--bg2:#c8e6c9;--card-bg:rgba(255,255,255,0.9);--card-bd:rgba(0,0,0,0.08);--t1:#1a1a2e;--t2:rgba(26,26,46,0.7);--t3:rgba(26,26,46,0.5);--acc:#2e7d32;--dng:#c62828;--tb-bg:rgba(232,245,233,0.95);--modal-bg:#fff;--inp-bg:rgba(0,0,0,0.05);--inp-bd:rgba(0,0,0,0.15);--ov-bg:rgba(0,0,0,0.4);--shd:0 8px 32px rgba(0,0,0,0.1)}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;background:var(--bg1);color:var(--t1);overflow-x:hidden}
+:root{--bg1:#1a1a2e;--bg2:#16213e;--card-bg:rgba(30,30,46,0.85);--card-bd:rgba(255,255,255,0.08);--t1:#fff;--t2:rgba(255,255,255,0.7);--t3:rgba(255,255,255,0.45);--acc:#00d4aa;--dng:#ff6b6b;--tb-bg:rgba(26,26,46,0.7);--modal-bg:#1e1e2e;--inp-bg:rgba(255,255,255,0.08);--inp-bd:rgba(255,255,255,0.15);--ov-bg:rgba(0,0,0,0.5);--shd:0 4px 24px rgba(0,0,0,0.25)}
+[data-theme="light"]{--bg1:#e8f5e9;--bg2:#c8e6c9;--card-bg:rgba(255,255,255,0.92);--card-bd:rgba(0,0,0,0.06);--t1:#1a1a2e;--t2:rgba(26,26,46,0.7);--t3:rgba(26,26,46,0.45);--acc:#2e7d32;--dng:#c62828;--tb-bg:rgba(232,245,233,0.85);--modal-bg:#fff;--inp-bg:rgba(0,0,0,0.05);--inp-bd:rgba(0,0,0,0.12);--ov-bg:rgba(0,0,0,0.35);--shd:0 4px 24px rgba(0,0,0,0.08)}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:var(--bg1);color:var(--t1);overflow-x:hidden;-webkit-font-smoothing:antialiased}
 body{background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg1) 100%);background-attachment:fixed}
-[data-theme="light"] body{background:linear-gradient(135deg,#e8f5e9 0%,#c8e6c9 30%,#a5d6a7 60%,#81c784 100%);background-attachment:fixed}
-.toolbar{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 12px;background:var(--tb-bg);backdrop-filter:blur(20px);z-index:100;border-bottom:1px solid var(--card-bd)}
-.toolbar-btn{width:40px;height:40px;border:none;background:transparent;color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%}
-.toolbar-btn:hover{background:var(--inp-bg)}
-.toolbar-title{flex:1;text-align:center;font-size:18px;font-weight:600}
-.toolbar-right{display:flex;gap:4px}
-.card-list{padding:72px 16px 24px;display:flex;flex-direction:column;gap:16px;min-height:calc(100vh - 80px)}
-.card{background:var(--card-bg);backdrop-filter:blur(20px);border-radius:16px;padding:20px;border:1px solid var(--card-bd);box-shadow:var(--shd);cursor:pointer;transition:transform 0.2s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-2px)}
-.card:active{transform:scale(0.98)}
-.card.expired{opacity:0.6}
-.card.expired::after{content:'已到期';position:absolute;top:12px;right:12px;background:var(--dng);color:#fff;padding:4px 10px;border-radius:12px;font-size:12px}
-.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.card-title{font-size:18px;font-weight:600;color:var(--t1);flex:1;margin-right:8px}
-.card-emoji{font-size:24px}
-.card-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;color:var(--t2);font-size:13px}
-.card-note{flex:1;margin-right:12px}
-.card-progress{white-space:nowrap}
-.card-countdown{display:flex;justify-content:space-between;align-items:center}
-.countdown-main{display:flex;align-items:baseline;gap:4px}
-.countdown-label{font-size:14px;color:var(--t2)}
-.countdown-number{font-size:36px;font-weight:700;color:var(--acc);line-height:1}
-.countdown-unit{font-size:14px;color:var(--t2);margin-left:2px}
-.card-target-date{font-size:13px;color:var(--t3)}
-.card-sort{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;opacity:1;transition:opacity 0.2s}
-.sort-btn{width:28px;height:28px;border:none;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+[data-theme="light"] body{background:linear-gradient(160deg,#c8e6c9 0%,#a5d6a7 40%,#81c784 70%,#66bb6a 100%);background-attachment:fixed}
+
+.toolbar{position:fixed;top:0;left:0;right:0;height:56px;display:flex;align-items:center;padding:0 8px;background:var(--tb-bg);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);z-index:100}
+.toolbar-btn{width:42px;height:42px;border:none;background:rgba(255,255,255,0.12);color:var(--t1);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+[data-theme="light"] .toolbar-btn{background:rgba(0,0,0,0.06)}
+.toolbar-btn:hover{background:rgba(255,255,255,0.2)}
+[data-theme="light"] .toolbar-btn:hover{background:rgba(0,0,0,0.1)}
+.toolbar-title{flex:1;text-align:center;font-size:17px;font-weight:600;letter-spacing:0.3px}
+.toolbar-right{display:flex;gap:6px}
+
+.card-list{padding:68px 14px 32px;display:flex;flex-direction:column;gap:14px;min-height:calc(100vh - 56px)}
+
+.card{border-radius:20px;padding:20px 22px 20px 22px;padding-right:40px;border:1px solid var(--card-bd);box-shadow:var(--shd);cursor:pointer;transition:transform 0.2s ease;position:relative;overflow:hidden}
+.card:active{transform:scale(0.97)}
+.card.expired{opacity:0.55}
+.card.expired::after{content:'已到期';position:absolute;top:14px;right:14px;background:var(--dng);color:#fff;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:500}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0}
+.card-title{font-size:17px;font-weight:700;color:var(--t1);flex:1;line-height:1.3;letter-spacing:0.2px}
+.card-countdown{display:flex;align-items:baseline;gap:3px;white-space:nowrap;margin-left:12px;flex-shrink:0}
+.countdown-label{font-size:12px;color:var(--t2);font-weight:500}
+.countdown-number{font-size:38px;font-weight:800;line-height:1;color:var(--acc);letter-spacing:-1px}
+.countdown-unit{font-size:13px;color:var(--t2);font-weight:500}
+
+.card-emoji-wrap{display:flex;justify-content:center;padding:12px 0 8px}
+.card-emoji{font-size:48px;line-height:1}
+
+.card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.card-note{font-size:13px;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-target-date{font-size:12px;color:var(--t3);margin-left:8px;white-space:nowrap;flex-shrink:0}
+
+.card-sort{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;opacity:0.7;transition:opacity 0.2s}
+.card:hover .card-sort{opacity:1}
+.sort-btn{width:24px;height:24px;border:none;background:rgba(255,255,255,0.2);color:rgba(255,255,255,0.85);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
 .sort-btn:hover{background:var(--acc);color:#fff}
-.sort-btn:disabled{opacity:0.3}
-.card-dark{background:linear-gradient(135deg,rgba(30,30,46,0.95),rgba(20,20,30,0.95));color:#fff}
-.card-dark .card-title,.card-dark .card-note,.card-dark .card-progress,.card-dark .card-label,.card-dark .card-target-date,.card-dark .countdown-label,.card-dark .countdown-unit{color:rgba(255,255,255,0.85)}
+.sort-btn:disabled{opacity:0.25;pointer-events:none}
+[data-theme="light"] .sort-btn{background:rgba(0,0,0,0.1);color:rgba(0,0,0,0.6)}
+[data-theme="light"] .sort-btn:hover{background:var(--acc);color:#fff}
+
+.card-dark{background:linear-gradient(145deg,rgba(25,25,40,0.92),rgba(15,15,25,0.95));color:#fff}
+.card-dark .card-title,.card-dark .card-note,.card-dark .card-target-date{color:rgba(255,255,255,0.85)}
 .card-dark .countdown-number{color:#00d4aa}
-.card-green{background:linear-gradient(135deg,rgba(46,125,50,0.85),rgba(56,142,60,0.85));color:#fff}
-.card-green .card-title,.card-green .card-note,.card-green .card-progress,.card-green .card-label,.card-green .card-target-date,.card-green .countdown-label,.card-green .countdown-unit{color:rgba(255,255,255,0.85)}
-.card-green .countdown-number{color:#00d4aa}
-.card-blue{background:linear-gradient(135deg,rgba(144,202,249,0.85),rgba(187,222,251,0.85));color:#1a1a2e}
-.card-blue .card-title,.card-blue .card-note,.card-blue .card-progress,.card-blue .card-target-date{color:rgba(26,26,46,0.8)}
+
+.card-green{background:linear-gradient(145deg,rgba(27,94,32,0.88),rgba(46,125,50,0.85));color:#fff}
+.card-green .card-title,.card-green .card-note,.card-green .card-target-date{color:rgba(255,255,255,0.85)}
+.card-green .countdown-number{color:#a5d6a7}
+
+.card-blue{background:linear-gradient(145deg,rgba(144,202,249,0.8),rgba(207,216,220,0.75));color:#1a1a2e}
+.card-blue .card-title,.card-blue .card-note{color:rgba(26,26,46,0.85)}
+.card-blue .card-target-date{color:rgba(26,26,46,0.5)}
 .card-blue .countdown-number{color:#1565c0}
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px;text-align:center}
-.empty-icon{font-size:64px;margin-bottom:16px}
-.empty-text{font-size:20px;font-weight:600;color:var(--t1);margin-bottom:8px}
-.empty-sub{font-size:14px;color:var(--t3);margin-bottom:24px}
-.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
-.btn-primary:hover{opacity:0.9}
-.btn-secondary{background:var(--inp-bg);color:var(--t1);border:1px solid var(--inp-bd);padding:12px 24px;border-radius:12px;font-size:16px;cursor:pointer}
-.btn-danger{background:transparent;color:var(--dng);border:1px solid var(--dng);padding:12px 24px;border-radius:12px;font-size:16px;cursor:pointer;width:100%;margin-top:12px}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 32px;text-align:center}
+.empty-icon{font-size:56px;margin-bottom:20px}
+.empty-text{font-size:18px;font-weight:600;color:var(--t1);margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--t3);margin-bottom:28px}
+.btn-primary{background:var(--acc);color:#fff;border:none;padding:12px 28px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity 0.15s}
+.btn-primary:hover{opacity:0.85}
+.btn-secondary{background:var(--inp-bg);color:var(--t1);border:1px solid var(--inp-bd);padding:12px 28px;border-radius:14px;font-size:15px;cursor:pointer}
+.btn-danger{background:transparent;color:var(--dng);border:1px solid var(--dng);padding:12px 28px;border-radius:14px;font-size:15px;cursor:pointer;width:100%;margin-top:12px}
+
 .modal-overlay,.theme-overlay,.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--ov-bg);display:flex;align-items:center;justify-content:center;z-index:200;padding:24px}
-.modal{background:var(--modal-bg);border-radius:20px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 0}
-.modal-title{font-size:20px;font-weight:600;color:var(--t1)}
-.modal-close{width:32px;height:32px;border:none;background:var(--inp-bg);color:var(--t2);border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--modal-bg);border-radius:24px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:22px 22px 0}
+.modal-title{font-size:19px;font-weight:700;color:var(--t1)}
+.modal-close{width:32px;height:32px;border:none;background:var(--inp-bg);color:var(--t2);border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
 .modal-close:hover{background:var(--dng);color:#fff}
-.modal-form{padding:20px}
+.modal-form{padding:20px 22px 22px}
 .form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:14px;font-weight:500;color:var(--t2);margin-bottom:6px}
-.form-group input{width:100%;padding:12px 16px;background:var(--inp-bg);border:1px solid var(--inp-bd);border-radius:10px;font-size:16px;color:var(--t1);outline:none}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--t2);margin-bottom:6px}
+.form-group input{width:100%;padding:12px 14px;background:var(--inp-bg);border:1px solid var(--inp-bd);border-radius:12px;font-size:15px;color:var(--t1);outline:none;transition:border-color 0.2s}
 .form-group input:focus{border-color:var(--acc)}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.7)}
 [data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
-.form-actions{display:flex;gap:12px;margin-top:20px}
+.form-actions{display:flex;gap:12px;margin-top:22px}
 .form-actions .btn-primary,.form-actions .btn-secondary{flex:1}
-.theme-panel{background:var(--modal-bg);border-radius:20px;width:100%;max-width:320px;padding:20px}
+
+.theme-panel{background:var(--modal-bg);border-radius:24px;width:100%;max-width:320px;padding:22px}
 .theme-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.theme-title{font-size:20px;font-weight:600;color:var(--t1)}
-.theme-options{display:flex;gap:16px}
-.theme-option{flex:1;background:transparent;border:2px solid var(--inp-bd);border-radius:12px;padding:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px}
+.theme-title{font-size:19px;font-weight:700;color:var(--t1)}
+.theme-options{display:flex;gap:14px}
+.theme-option{flex:1;background:transparent;border:2px solid var(--inp-bd);border-radius:14px;padding:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:border-color 0.2s}
 .theme-option.active{border-color:var(--acc)}
-.theme-preview{width:100%;height:60px;border-radius:8px}
+.theme-preview{width:100%;height:56px;border-radius:10px}
 .theme-dark-p{background:linear-gradient(135deg,#1a1a2e,#16213e)}
-.theme-light-p{background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
-.theme-name{font-size:14px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.5)}
-.confirm-box{background:var(--modal-bg);border-radius:20px;padding:24px;width:100%;max-width:300px;text-align:center}
-.confirm-text{font-size:18px;font-weight:600;color:var(--t1);margin-bottom:8px}
-.confirm-sub{font-size:14px;color:var(--t3);margin-bottom:20px}
+.theme-light-p{background:linear-gradient(135deg,#e8f5e9,#a5d6a7)}
+.theme-name{font-size:13px;font-weight:600;color:var(--t1);text-shadow:0 1px 3px rgba(0,0,0,0.15)}
+
+.confirm-box{background:var(--modal-bg);border-radius:24px;padding:28px 24px;width:100%;max-width:300px;text-align:center}
+.confirm-text{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:6px}
+.confirm-sub{font-size:13px;color:var(--t3);margin-bottom:22px}
 .confirm-actions{display:flex;gap:12px}
 .confirm-actions .btn-secondary,.confirm-actions .btn-danger{flex:1;margin-top:0}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.card{animation:fadeIn 0.3s ease-out}
-@keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeIn 0.35s ease-out}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .modal,.theme-panel,.confirm-box{animation:slideUp 0.3s ease-out}
 </style>
 </head>
 <body>
-<header class="toolbar"><button class="toolbar-btn" id="btn-back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h1 class="toolbar-title">目标倒计时</h1><div class="toolbar-right"><button class="toolbar-btn" id="btn-add"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button><button class="toolbar-btn" id="btn-theme"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></button></div></header><main class="card-list" id="card-list"></main><div class="empty-state" id="empty-state" style="display:none"><div class="empty-icon">🎯</div><p class="empty-text">还没有目标</p><p class="empty-sub">点击右上角 + 添加你的第一个目标</p><button class="btn-primary" id="btn-empty-add">去添加</button></div><div class="modal-overlay" id="modal-overlay" style="display:none"><div class="modal"><div class="modal-header"><h2 class="modal-title" id="modal-title">添加目标</h2><button class="modal-close" id="modal-close">&times;</button></div><form class="modal-form" id="modal-form"><input type="hidden" id="form-id"><div class="form-group"><label>标题 *</label><input type="text" id="form-title" required></div><div class="form-group"><label>备注</label><input type="text" id="form-note"></div><div class="form-group"><label>Emoji</label><input type="text" id="form-emoji" maxlength="2"></div><div class="form-group"><label>开始日期</label><input type="date" id="form-start-date" required></div><div class="form-group"><label>目标日期 *</label><input type="date" id="form-target-date" required></div><div class="form-actions"><button type="button" class="btn-secondary" id="form-cancel">取消</button><button type="submit" class="btn-primary">保存</button></div><button type="button" class="btn-danger" id="form-delete" style="display:none">删除此目标</button></form></div></div><div class="theme-overlay" id="theme-overlay" style="display:none"><div class="theme-panel"><div class="theme-header"><h2 class="theme-title">选择主题</h2><button class="modal-close" id="theme-close">&times;</button></div><div class="theme-options"><button class="theme-option" data-theme="dark"><div class="theme-preview theme-dark-p"></div><span class="theme-name">深色</span></button><button class="theme-option" data-theme="light"><div class="theme-preview theme-light-p"></div><span class="theme-name">浅色</span></button></div></div></div><div class="confirm-overlay" id="confirm-overlay" style="display:none"><div class="confirm-box"><p class="confirm-text">确定要删除这个目标吗？</p><p class="confirm-sub">此操作不可撤销</p><div class="confirm-actions"><button class="btn-secondary" id="confirm-cancel">取消</button><button class="btn-danger" id="confirm-ok">删除</button></div></div></div>
+<header class="toolbar"><button class="toolbar-btn" id="btn-back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button><h1 class="toolbar-title">目标倒计时</h1><div class="toolbar-right"><button class="toolbar-btn" id="btn-add"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button><button class="toolbar-btn" id="btn-theme"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></button></div></header>
+<main class="card-list" id="card-list"></main>
+<div class="empty-state" id="empty-state" style="display:none"><div class="empty-icon">🎯</div><p class="empty-text">还没有目标</p><p class="empty-sub">点击右上角 + 添加你的第一个目标</p><button class="btn-primary" id="btn-empty-add">去添加</button></div>
+<div class="modal-overlay" id="modal-overlay" style="display:none"><div class="modal"><div class="modal-header"><h2 class="modal-title" id="modal-title">添加目标</h2><button class="modal-close" id="modal-close">&times;</button></div><form class="modal-form" id="modal-form"><input type="hidden" id="form-id"><div class="form-group"><label>标题 *</label><input type="text" id="form-title" required></div><div class="form-group"><label>备注</label><input type="text" id="form-note"></div><div class="form-group"><label>Emoji</label><input type="text" id="form-emoji" maxlength="2"></div><div class="form-group"><label>开始日期</label><input type="date" id="form-start-date" required></div><div class="form-group"><label>目标日期 *</label><input type="date" id="form-target-date" required></div><div class="form-actions"><button type="button" class="btn-secondary" id="form-cancel">取消</button><button type="submit" class="btn-primary">保存</button></div><button type="button" class="btn-danger" id="form-delete" style="display:none">删除此目标</button></form></div></div>
+<div class="theme-overlay" id="theme-overlay" style="display:none"><div class="theme-panel"><div class="theme-header"><h2 class="theme-title">选择主题</h2><button class="modal-close" id="theme-close">&times;</button></div><div class="theme-options"><button class="theme-option" data-theme="dark"><div class="theme-preview theme-dark-p"></div><span class="theme-name">深色</span></button><button class="theme-option" data-theme="light"><div class="theme-preview theme-light-p"></div><span class="theme-name">浅色</span></button></div></div></div>
+<div class="confirm-overlay" id="confirm-overlay" style="display:none"><div class="confirm-box"><p class="confirm-text">确定要删除这个目标吗？</p><p class="confirm-sub">此操作不可撤销</p><div class="confirm-actions"><button class="btn-secondary" id="confirm-cancel">取消</button><button class="btn-danger" id="confirm-ok">删除</button></div></div></div>
 <script>
 const S={KEY:'ct',V:1,
   d(){try{const r=localStorage.getItem(this.KEY);if(!r)return null;const d=JSON.parse(r);return d&&d.v===this.V?d:null}catch(e){return null}},
@@ -138,12 +162,12 @@ const A={cl:null,es:null,mo:null,mt:null,mf:null,to:null,co:null,cei:null,cdi:nu
       const info=S.ci(x);
       const cc=x.cs?'card-'+x.cs:'';
       const ec=info.exp?'expired':'';
-      const em=x.emoji?'<span class="card-emoji">'+this.esc(x.emoji)+'</span>':'';
+      const em=x.emoji?'<div class="card-emoji-wrap"><span class="card-emoji">'+this.esc(x.emoji)+'</span></div>':'';
       return '<div class="card '+cc+' '+ec+'" data-id="'+x.id+'">'+
-        '<div class="card-header"><span class="card-title">'+this.esc(x.title)+'</span>'+em+'</div>'+
-        '<div class="card-info"><span class="card-note">'+this.esc(x.note||'')+'</span></div>'+
-        '<div class="card-countdown"><div class="countdown-main"><span class="countdown-label">还剩</span><span class="countdown-number">'+info.remain+'</span><span class="countdown-unit">天</span></div><span class="card-target-date">'+x.td+'</span></div>'+
-        '<div class="card-sort"><button class="sort-btn" data-a="up" data-id="'+x.id+'"'+(i===0?' disabled':'')+'><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg></button><button class="sort-btn" data-a="dn" data-id="'+x.id+'"'+(i===t.length-1?' disabled':'')+'><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>'+
+        '<div class="card-top"><span class="card-title">'+this.esc(x.title)+'</span><div class="card-countdown"><span class="countdown-label">还剩</span><span class="countdown-number">'+info.remain+'</span><span class="countdown-unit">天</span></div></div>'+
+        em+
+        '<div class="card-bottom"><span class="card-note">'+this.esc(x.note||'')+'</span><span class="card-target-date">'+x.td+'</span></div>'+
+        '<div class="card-sort"><button class="sort-btn" data-a="up" data-id="'+x.id+'"'+(i===0?' disabled':'')+'><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg></button><button class="sort-btn" data-a="dn" data-id="'+x.id+'"'+(i===t.length-1?' disabled':'')+'><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>'+
         '</div>';
     }).join('');
   },
