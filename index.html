@@ -34,9 +34,8 @@ body{background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg1) 1
 .countdown-number{font-size:36px;font-weight:700;color:var(--acc);line-height:1}
 .countdown-unit{font-size:14px;color:var(--t2);margin-left:2px}
 .card-target-date{font-size:13px;color:var(--t3)}
-.card-sort{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;opacity:0;transition:opacity 0.2s}
-.card:hover .card-sort{opacity:1}
-.sort-btn{width:28px;height:28px;border:none;background:rgba(0,0,0,0.15);color:rgba(26,26,46,0.7);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.card-sort{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:4px;opacity:1;transition:opacity 0.2s}
+.sort-btn{width:28px;height:28px;border:none;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
 .sort-btn:hover{background:var(--acc);color:#fff}
 .sort-btn:disabled{opacity:0.3}
 .card-dark{background:linear-gradient(135deg,rgba(30,30,46,0.95),rgba(20,20,30,0.95));color:#fff}
@@ -106,7 +105,7 @@ const S={KEY:'ct',V:1,
   upd(id,u){const l=this.gl();const i=l.findIndex(x=>x.id===id);if(i!==-1){l[i]={...l[i],...u};this.sl(l);return l[i]}return null},
   del(id){this.sl(this.gl().filter(x=>x.id!==id))},
   mv(id,dir){const l=this.gl();const i=l.findIndex(x=>x.id===id);if(i===-1)return false;const n=i+dir;if(n<0||n>=l.length)return false;[l[i],l[n]]=[l[n],l[i]];this.sl(l);return true},
-  ci(t){const now=new Date();now.setHours(0,0,0,0);const sd=new Date(t.sd);sd.setHours(0,0,0,0);const td=new Date(t.td);td.setHours(0,0,0,0);const total=Math.ceil((td-sd)/864e5);const passed=Math.ceil((now-sd)/864e5);const remain=Math.max(0,Math.ceil((td-now)/864e5));return{total,passed,remain,exp:remain<=0}},
+  ci(t){const now=new Date();now.setHours(0,0,0,0);const sd=new Date(t.sd);sd.setHours(0,0,0,0);const td=new Date(t.td);td.setHours(0,0,0,0);const total=Math.ceil((td-sd)/864e5);const passed=Math.max(0,Math.ceil((now-sd)/864e5));const remain=Math.max(0,Math.ceil((td-now)/864e5));return{total,passed,remain,exp:remain<=0}},
   samp(){const n=new Date().toISOString();return[
     {id:'s1',title:'全国大学生数学竞赛',note:'拿到国赛资格',emoji:'',sd:'2026-08-28',td:'2026-11-14',cs:'dark',ct:n},
     {id:'s2',title:'六级',note:'550',emoji:'🍳',sd:'2026-08-28',td:'2026-12-12',cs:'green',ct:n},
@@ -139,12 +138,12 @@ const A={cl:null,es:null,mo:null,mt:null,mf:null,to:null,co:null,cei:null,cdi:nu
       const info=S.ci(x);
       const cc=x.cs?'card-'+x.cs:'';
       const ec=info.exp?'expired':'';
-      const em=x.emoji?'<span class="card-emoji">'+x.emoji+'</span>':'';
+      const em=x.emoji?'<span class="card-emoji">'+this.esc(x.emoji)+'</span>':'';
       return '<div class="card '+cc+' '+ec+'" data-id="'+x.id+'">'+
         '<div class="card-header"><span class="card-title">'+this.esc(x.title)+'</span>'+em+'</div>'+
-        '<div class="card-info"><span class="card-note">'+this.esc(x.note||'')+'</span><span class="card-progress">已过 '+info.passed+'/'+info.total+' 天</span></div>'+
+        '<div class="card-info"><span class="card-note">'+this.esc(x.note||'')+'</span></div>'+
         '<div class="card-countdown"><div class="countdown-main"><span class="countdown-label">还剩</span><span class="countdown-number">'+info.remain+'</span><span class="countdown-unit">天</span></div><span class="card-target-date">'+x.td+'</span></div>'+
-        '<div class="card-sort"><button class="sort-btn" data-a="up" data-id="'+x.id+'"'+(i===0?' disabled':'')+'↑</button><button class="sort-btn" data-a="dn" data-id="'+x.id+'"'+(i===t.length-1?' disabled':'')+'↓</button></div>'+
+        '<div class="card-sort"><button class="sort-btn" data-a="up" data-id="'+x.id+'"'+(i===0?' disabled':'')+'><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg></button><button class="sort-btn" data-a="dn" data-id="'+x.id+'"'+(i===t.length-1?' disabled':'')+'><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg></button></div>'+
         '</div>';
     }).join('');
   },
