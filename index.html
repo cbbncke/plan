@@ -278,6 +278,7 @@ document.querySelectorAll('.tab-item').forEach(tab => {
     document.getElementById('countdownPage').classList.toggle('active', currentTab === 'countdown');
     document.getElementById('memoPage').classList.toggle('active', currentTab === 'memo');
     document.getElementById('toolbarTitle').textContent = currentTab === 'countdown' ? '🎯 目标倒计时' : '📝 备忘录';
+    if (currentTab === 'memo') clearMemoSearch();
     updateFab();
   });
 });
@@ -295,7 +296,9 @@ document.getElementById('fabBtn').addEventListener('click', () => {
 function getDaysLeft(dateStr) {
   const target = new Date(dateStr + 'T23:59:59');
   const now = new Date();
-  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  const diffMs = target - now;
+  if (diffMs < 0 && Math.abs(diffMs) < 86400000) return 0; // 昨天的目标显示0天
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 }
 
 function formatDate(dateStr) {
@@ -311,9 +314,9 @@ function renderCountdowns() {
   }
   list.innerHTML = countdowns.map((c, i) => {
     const days = getDaysLeft(c.date);
-    const expired = days < 0;
+    const expired = days <= 0;
     const colorObj = COLORS.find(cl => cl.name === c.color) || COLORS[0];
-    return `<div class="card ${colorObj.class} ${expired ? 'expired' : ''}" onclick="openCountdownModal('${c.id}')" style="background:${colorObj.gradient}">
+    return `<div class="card ${colorObj.class} ${expired ? 'expired' : ''}" onclick="openCountdownModal(this.dataset.id)" data-id="${esc(c.id)}" style="background:${colorObj.gradient}">
       <div class="card-top">
         <div class="card-title">${esc(c.title)}</div>
         <div class="card-countdown">
@@ -443,6 +446,12 @@ function onMemoSearch() {
   renderMemos();
 }
 
+function clearMemoSearch() {
+  memoSearchQuery = '';
+  document.getElementById('memoSearch').value = '';
+  renderMemos();
+}
+
 function renderMemos() {
   const list = document.getElementById('memoList');
   const filtered = memoSearchQuery
@@ -455,8 +464,8 @@ function renderMemos() {
     return;
   }
   list.innerHTML = filtered.map(m => `
-    <div class="memo-card" onclick="openMemoModal('${m.id}')">
-      <button class="memo-card-delete" onclick="event.stopPropagation();quickDeleteMemo('${m.id}')" title="删除">🗑</button>
+    <div class="memo-card" onclick="openMemoModal(this.dataset.id)" data-id="${esc(m.id)}">
+      <button class="memo-card-delete" onclick="event.stopPropagation();quickDeleteMemo(this.closest('.memo-card').dataset.id)" title="删除">🗑</button>
       <div class="memo-card-title">${highlightText(m.title || '无标题', memoSearchQuery)}</div>
       <div class="memo-card-content">${highlightText(m.content, memoSearchQuery)}</div>
       <div class="memo-card-time">${formatTime(m.updatedAt || m.createdAt)}</div>
