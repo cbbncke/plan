@@ -27,6 +27,13 @@ body{background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg1) 1
 .tab-item.active .tab-icon{transform:scale(1.1)}
 
 .card-list,.memo-list{padding:68px 14px 80px;display:flex;flex-direction:column;gap:14px;min-height:calc(100vh - 112px)}
+.search-bar{position:fixed;top:56px;left:0;right:0;padding:10px 14px;background:var(--tb-bg);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);z-index:99;border-bottom:1px solid var(--card-bd)}
+.search-input{width:100%;background:var(--inp-bg);border:1px solid var(--inp-bd);border-radius:12px;padding:10px 16px 10px 38px;color:var(--t1);font-size:14px;outline:none;transition:border-color 0.2s;font-family:inherit}
+.search-input:focus{border-color:var(--acc)}
+.search-input::placeholder{color:var(--t3)}
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--t3);pointer-events:none}
+.memo-list.with-search{padding-top:118px}
 
 .card{border-radius:20px;padding:20px 22px 20px 22px;padding-right:40px;border:1px solid var(--card-bd);box-shadow:var(--shd);cursor:pointer;transition:transform 0.2s ease;position:relative;overflow:hidden}
 .card:active{transform:scale(0.97)}
@@ -139,7 +146,13 @@ body{background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg1) 1
 </div>
 
 <div id="memoPage" class="page">
-  <div class="memo-list" id="memoList"></div>
+  <div class="search-bar" id="searchBar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="memoSearch" placeholder="搜索备忘录..." oninput="onMemoSearch()">
+    </div>
+  </div>
+  <div class="memo-list with-search" id="memoList"></div>
 </div>
 
 <button class="fab" id="fabBtn">＋</button>
@@ -423,20 +436,39 @@ function closeCountdownModal() {
 }
 
 // ===== 备忘录渲染 =====
+let memoSearchQuery = '';
+
+function onMemoSearch() {
+  memoSearchQuery = document.getElementById('memoSearch').value.trim().toLowerCase();
+  renderMemos();
+}
+
 function renderMemos() {
   const list = document.getElementById('memoList');
-  if (memos.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">还没有备忘录</div><div class="empty-sub">点击下方 ＋ 按钮记录你的想法</div></div>`;
+  const filtered = memoSearchQuery
+    ? memos.filter(m => (m.title || '').toLowerCase().includes(memoSearchQuery) || (m.content || '').toLowerCase().includes(memoSearchQuery))
+    : memos;
+
+  if (filtered.length === 0) {
+    const isSearch = !!memoSearchQuery;
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">${isSearch ? '🔍' : '📝'}</div><div class="empty-text">${isSearch ? '没有找到匹配的备忘录' : '还没有备忘录'}</div><div class="empty-sub">${isSearch ? '试试其他关键词' : '点击下方 ＋ 按钮记录你的想法'}</div></div>`;
     return;
   }
-  list.innerHTML = memos.map(m => `
+  list.innerHTML = filtered.map(m => `
     <div class="memo-card" onclick="openMemoModal('${m.id}')">
       <button class="memo-card-delete" onclick="event.stopPropagation();quickDeleteMemo('${m.id}')" title="删除">🗑</button>
-      <div class="memo-card-title">${esc(m.title || '无标题')}</div>
-      <div class="memo-card-content">${esc(m.content)}</div>
+      <div class="memo-card-title">${highlightText(m.title || '无标题', memoSearchQuery)}</div>
+      <div class="memo-card-content">${highlightText(m.content, memoSearchQuery)}</div>
       <div class="memo-card-time">${formatTime(m.updatedAt || m.createdAt)}</div>
     </div>
   `).join('');
+}
+
+function highlightText(text, query) {
+  if (!query) return esc(text);
+  const escaped = esc(text);
+  const q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(`(${q})`, 'gi'), '<mark style="background:rgba(0,212,170,0.3);color:inherit;border-radius:3px;padding:0 2px">$1</mark>');
 }
 
 function formatTime(iso) {
