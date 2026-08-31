@@ -92,7 +92,7 @@ body{background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,var(--bg1) 1
 .btn-danger:hover{background:rgba(255,107,107,0.1)}
 
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--ov-bg);display:flex;align-items:flex-end;justify-content:center;z-index:200;padding:0}
-.modal{background:var(--modal-bg);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;animation:slideUp 0.3s ease}
+.modal{background:var(--modal-bg);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:min(85vh,var(--app-vh,100vh));overflow-y:auto;-webkit-overflow-scrolling:touch;animation:slideUp 0.3s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-header{display:flex;justify-content:space-between;align-items:center;padding:22px 22px 0}
 .modal-title{font-size:19px;font-weight:700;color:var(--t1)}
@@ -584,6 +584,48 @@ renderMemos();
 
 // 每分钟刷新倒计时
 setInterval(() => { if (currentTab === 'countdown') renderCountdowns(); }, 60000);
+
+// ===== 移动端键盘弹出时自动调整模态框 =====
+(function() {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (!isMobile) return;
+
+  function updateViewportHeight() {
+    const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    document.documentElement.style.setProperty('--app-vh', vh + 'px');
+  }
+
+  // 初始化
+  updateViewportHeight();
+
+  // 监听 visualViewport 变化（键盘弹出/收起）
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function() {
+      updateViewportHeight();
+      // 键盘弹出时，自动滚动聚焦的输入框到可见区域
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.classList.contains('form-input') || activeEl.classList.contains('form-textarea') || activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+        setTimeout(function() {
+          activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    });
+    window.visualViewport.addEventListener('scroll', function() {
+      updateViewportHeight();
+    });
+  }
+
+  // 输入框获得焦点时，自动滚动到可见区域
+  document.addEventListener('focusin', function(e) {
+    const el = e.target;
+    if (el && (el.classList.contains('form-input') || el.classList.contains('form-textarea') || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+      setTimeout(function() {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 350);
+    }
+  });
+})();
+
 </script>
 </body>
 </html>

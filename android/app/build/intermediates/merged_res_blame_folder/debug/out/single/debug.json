@@ -4,8 +4,8 @@
         "source": "com.countdown.app-main-23:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "C:\\Users\\SZZY\\.gradle\\daemon\\8.14.3\\com.countdown.app-merged_res-21:\\layout_activity_main.xml.flat",
-        "source": "C:\\Users\\SZZY\\.gradle\\daemon\\8.14.3\\com.countdown.app-main-23:\\layout\\activity_main.xml"
+        "merged": "com.countdown.app-merged_res-21:/layout_activity_main.xml.flat",
+        "source": "com.countdown.app-main-23:/layout/activity_main.xml"
     },
     {
         "merged": "com.countdown.app-merged_res-21:/mipmap-anydpi-v26_ic_launcher.xml.flat",
